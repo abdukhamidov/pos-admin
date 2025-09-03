@@ -19,6 +19,7 @@ services:
       context: .
       dockerfile: apps/admin/Dockerfile
     container_name: mini_crm_admin
+    restart: unless-stopped
     depends_on:
       - db
     environment:
@@ -27,13 +28,14 @@ services:
       TZ: Asia/Tashkent
       PORT: 3000
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
 
   pos:
     build:
       context: .
       dockerfile: apps/pos/Dockerfile
     container_name: mini_crm_pos
+    restart: unless-stopped
     depends_on:
       - db
     environment:
@@ -42,7 +44,7 @@ services:
       TZ: Asia/Tashkent
       PORT: 4000
     ports:
-      - "4000:4000"
+      - "127.0.0.1:4000:4000"
 
   bot:
     build:
