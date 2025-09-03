@@ -52,10 +52,11 @@ export async function POST(req: NextRequest) {
   const { username, name, role, password, branchId } = parsed.data
   try {
     const passwordHash = await bcrypt.hash(password, 11)
-    if (role === 'SELLER' && !branchId) {
+    const normalizedBranchId = branchId && branchId.trim() ? branchId : null
+    if (role === 'SELLER' && !normalizedBranchId) {
       return NextResponse.json({ error: 'BRANCH_REQUIRED' }, { status: 400 })
     }
-    const user = await prisma.user.create({ data: { username, name, role, passwordHash, branchId: branchId ?? null } })
+    const user = await prisma.user.create({ data: { username, name, role, passwordHash, branchId: normalizedBranchId } })
     await audit('USER_CREATE', session.sub, { id: user.id, username })
     return NextResponse.json(user)
   } catch (e: any) {
