@@ -1,5 +1,5 @@
 # POS app Dockerfile
-FROM node:20-alpine AS base
+FROM node:20-bookworm-slim AS base
 WORKDIR /app
 
 # Install deps (workspaces)
@@ -7,8 +7,7 @@ COPY package.json ./
 COPY packages ./packages
 COPY apps/pos/package.json ./apps/pos/package.json
 
-RUN apk add --no-cache openssl1.1-compat \
-  && npm install --silent
+RUN npm install --silent
 
 # Build
 COPY . .
