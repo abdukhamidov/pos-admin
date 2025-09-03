@@ -44,6 +44,18 @@ services:
     ports:
       - "4000:4000"
 
+  bot:
+    build:
+      context: .
+      dockerfile: apps/bot/Dockerfile
+    container_name: mini_crm_bot
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/mini_crm
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_ALLOWED_IDS: ${TELEGRAM_ALLOWED_IDS}
+      TZ: Asia/Tashkent
+
 volumes:
   db_data:
-

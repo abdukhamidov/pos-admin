@@ -192,3 +192,12 @@ model StockMove {
   warehouse   Warehouse     @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
   user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
+
+// Telegram access control for the reports bot
+model TelegramAccess {
+  id        String   @id @default(cuid())
+  tgId      String   @unique
+  isAdmin   Boolean  @default(false)
+  name      String?
+  createdAt DateTime @default(now())
+}
