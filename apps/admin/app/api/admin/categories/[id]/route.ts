@@ -35,12 +35,18 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const session = await getSessionFromRequest(req)
   if (!session || session.role !== 'ADMIN') return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
   const { id } = params
-  const count = await prisma.product.count({ where: { categoryId: id } })
-  if (count > 0) {
-    return NextResponse.json({ error: 'CATEGORY_HAS_PRODUCTS' }, { status: 400 })
-  }
-  await prisma.category.delete({ where: { id } })
+  // Удаляем зависимые данные продуктов этой категории и саму категорию
+  await prisma.$transaction(async (tx) => {
+    const productIds = (await tx.product.findMany({ where: { categoryId: id }, select: { id: true } })).map(p => p.id)
+    if (productIds.length > 0) {
+      // удаляем связанные записи продаж и движений склада по товарам
+      await tx.saleItem.deleteMany({ where: { productId: { in: productIds } } })
+      await tx.stockMove.deleteMany({ where: { productId: { in: productIds } } })
+      await tx.inventory.deleteMany({ where: { productId: { in: productIds } } })
+      await tx.product.deleteMany({ where: { id: { in: productIds } } })
+    }
+    await tx.category.delete({ where: { id } })
+  })
   await audit('CATEGORY_DELETE', session.sub, { id })
   return NextResponse.json({ ok: true })
 }
-

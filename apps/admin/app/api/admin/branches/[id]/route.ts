@@ -21,10 +21,22 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const session = await getSessionFromRequest(req)
   if (!session || session.role !== 'ADMIN') return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
   const id = params.id
-  const users = await prisma.user.count({ where: { branchId: id } })
-  const warehouses = await prisma.warehouse.count({ where: { branchId: id } })
-  if (users > 0 || warehouses > 0) return NextResponse.json({ error: 'HAS_DEPENDENCIES' }, { status: 400 })
-  await prisma.branch.delete({ where: { id } })
+  await prisma.$transaction(async (tx) => {
+    // Удаляем продажи и их позиции по филиалу
+    await tx.saleItem.deleteMany({ where: { sale: { is: { branchId: id } } } })
+    await tx.sale.deleteMany({ where: { branchId: id } })
+    // Удаляем смены по филиалу
+    await tx.shift.deleteMany({ where: { branchId: id } })
+    // Движения склада и остатки через склады этого филиала
+    const whs = await tx.warehouse.findMany({ where: { branchId: id }, select: { id: true } })
+    const whIds = whs.map(w => w.id)
+    if (whIds.length > 0) {
+      await tx.stockMove.deleteMany({ where: { warehouseId: { in: whIds } } })
+      await tx.inventory.deleteMany({ where: { warehouseId: { in: whIds } } })
+      await tx.warehouse.deleteMany({ where: { id: { in: whIds } } })
+    }
+    // Пользователи будут отвязаны автоматически (branchId nullable with onDelete SetNull)
+    await tx.branch.delete({ where: { id } })
+  })
   return NextResponse.json({ ok: true })
 }
-

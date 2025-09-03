@@ -72,6 +72,9 @@ export default function ProductsPage() {
 
       {loading && <div className="text-sm text-muted-foreground">Загрузка…</div>}
 
+      {(!loading && items.length === 0) && (
+        <div className="text-sm text-muted-foreground">Пока что нет товаров</div>
+      )}
       <div className="overflow-auto rounded-md border">
         <table className="min-w-full text-sm">
           <thead>
@@ -131,4 +134,3 @@ export default function ProductsPage() {
     </main>
   )
 }
-

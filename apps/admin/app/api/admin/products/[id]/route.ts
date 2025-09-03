@@ -39,9 +39,12 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const session = await getSessionFromRequest(req)
   if (!session || session.role !== 'ADMIN') return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
   const { id } = params
-  const usage = await prisma.saleItem.count({ where: { productId: id } })
-  if (usage > 0) return NextResponse.json({ error: 'HAS_SALES' }, { status: 400 })
-  await prisma.product.delete({ where: { id } })
+  await prisma.$transaction(async (tx) => {
+    await tx.saleItem.deleteMany({ where: { productId: id } })
+    await tx.stockMove.deleteMany({ where: { productId: id } })
+    await tx.inventory.deleteMany({ where: { productId: id } })
+    await tx.product.delete({ where: { id } })
+  })
   await audit('PRODUCT_DELETE', session.sub, { id })
   return NextResponse.json({ ok: true })
 }

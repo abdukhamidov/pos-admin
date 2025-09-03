@@ -41,6 +41,9 @@ export default function CategoriesPage() {
         </div>
       </div>
       {loading && <div className="text-sm text-muted-foreground">Загрузка…</div>}
+      {(!loading && items.length === 0) && (
+        <div className="text-sm text-muted-foreground">Пока что нет категорий</div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 max-w-4xl">
         {items.map((c) => (
           <Card key={c.id} className="rounded-xl">
