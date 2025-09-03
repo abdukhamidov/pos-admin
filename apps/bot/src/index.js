@@ -1,6 +1,9 @@
 import { Telegraf, Markup } from 'telegraf'
 import { z } from 'zod'
-import { prisma } from '@mini/db'
+import { PrismaClient } from '@prisma/client'
+
+// Локальный инстанс Prisma, чтобы не тянуть TS-модуль @mini/db
+const prisma = new PrismaClient()
 
 const envSchema = z.object({
   TELEGRAM_BOT_TOKEN: z.string().min(1),
@@ -199,4 +202,3 @@ bootstrap().catch((e) => {
 
 process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
-
