@@ -7,6 +7,8 @@ COPY package.json ./
 COPY packages ./packages
 COPY apps/pos/package.json ./apps/pos/package.json
 
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
 RUN npm install --silent
 
 # Build
