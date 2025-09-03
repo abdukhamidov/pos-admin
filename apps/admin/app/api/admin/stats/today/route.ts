@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+// Отключаем пререндеринг на билде — маршрут всегда динамический
+export const dynamic = 'force-dynamic'
 import { prisma } from '@mini/db'
 import { formatDayKey } from '@mini/utils'
 
@@ -24,4 +26,3 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json({ revenue, count, avg, topProduct: top[0]?.nameSnapshot ?? null })
 }
-

@@ -7,6 +7,9 @@ COPY package.json ./
 COPY packages ./packages
 COPY apps/admin/package.json ./apps/admin/package.json
 
+# Needed for Prisma engine on Alpine (libssl 1.1 compatibility)
+RUN apk add --no-cache openssl1.1-compat
+
 RUN npm install --silent
 
 # Build
@@ -16,4 +19,3 @@ RUN npm run db:generate && npm run build:admin
 
 EXPOSE 3000
 CMD ["npm", "run", "start:admin"]
-

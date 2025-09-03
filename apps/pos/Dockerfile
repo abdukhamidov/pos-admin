@@ -7,7 +7,8 @@ COPY package.json ./
 COPY packages ./packages
 COPY apps/pos/package.json ./apps/pos/package.json
 
-RUN npm install --silent
+RUN apk add --no-cache openssl1.1-compat \
+  && npm install --silent
 
 # Build
 COPY . .
@@ -16,4 +17,3 @@ RUN npm run db:generate && npm run build:pos
 
 EXPOSE 4000
 CMD ["npm", "run", "start:pos"]
-
