@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     : {}
   const activeProducts = await prisma.product.findMany({ where: { isActive: true }, include: { inventory: { ...(includeInventory as any) } }, orderBy: { name: 'asc' } })
   const items = activeProducts
-    .map((p) => ({ ...p, stock: p.inventory.reduce<number>((s, i) => s + i.qty, 0) }))
+    .map((p) => ({ ...p, stock: p.inventory.reduce((s: number, i) => s + i.qty, 0) }))
     .filter((p) => p.stock <= (isFinite(threshold) ? threshold : 5))
     .slice(0, 50)
     .map((p) => ({ id: p.id, name: p.name, sku: p.sku, price: p.price, stock: p.stock }))
