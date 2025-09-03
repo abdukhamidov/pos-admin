@@ -1,0 +1,20 @@
+import { ReactNode } from 'react'
+import { Button } from '@mini/ui'
+
+export function POSShell({ children }: { children: ReactNode }) {
+  return (
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <header className="flex items-center gap-3 h-14 border-b px-5">
+        <a href="/pos" className="font-semibold">Mini CRM — POS</a>
+        <nav className="ml-auto flex items-center gap-3 text-sm">
+          <a className="underline-offset-4 hover:underline" href="/pos/history">История</a>
+          <a href="/login" className="h-8 inline-flex items-center justify-center rounded-md border px-3 text-sm hover:bg-accent">
+            Сменить пользователя
+          </a>
+        </nav>
+      </header>
+      <main className="flex-1 p-4">{children}</main>
+    </div>
+  )
+}
+

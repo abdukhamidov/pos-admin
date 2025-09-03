@@ -1,0 +1,194 @@
+// Prisma schema for Mini CRM + POS
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SELLER
+}
+
+enum SaleStatus {
+  OPEN
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  username     String     @unique
+  passwordHash String
+  name         String
+  role         Role
+  branchId     String?
+  branch       Branch?    @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  sales  Sale[]
+  shifts Shift[]  @relation("UserShifts")
+  logs       AuditLog[]
+  stockMoves StockMove[]
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  description String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id         String    @id @default(cuid())
+  name       String
+  sku        String?   @unique
+  price      Int
+  isActive   Boolean   @default(true)
+  categoryId String
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  saleItems   SaleItem[]
+  inventory   Inventory[]
+  stockMoves  StockMove[]
+}
+
+model Shift {
+  id           String    @id @default(cuid())
+  sellerId     String
+  seller       User      @relation("UserShifts", fields: [sellerId], references: [id], onDelete: Restrict)
+  branchId     String
+  branch       Branch    @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  startedAt    DateTime  @default(now())
+  endedAt      DateTime?
+  openingNote  String?
+  closingNote  String?
+  openingCash  Int?
+  closingCash  Int?
+
+  sales        Sale[]
+}
+
+model Sale {
+  id        String      @id @default(cuid())
+  // day: YYYY-MM-DD in Asia/Tashkent for human-friendly per-day numbering
+  day       String
+  number    Int
+  sellerId  String
+  seller    User        @relation(fields: [sellerId], references: [id], onDelete: Restrict)
+  shiftId   String?
+  shift     Shift?      @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  branchId  String
+  branch    Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  status    SaleStatus  @default(OPEN)
+  total     Int         @default(0)
+  // payment
+  paymentMethod PaymentMethod @default(CASH)
+  cashPaid      Int           @default(0)
+  cardPaid      Int           @default(0)
+  createdAt DateTime    @default(now())
+  closedAt  DateTime?
+
+  items     SaleItem[]
+
+  @@unique([branchId, day, number])
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  MIXED
+}
+
+model SaleItem {
+  id           String   @id @default(cuid())
+  saleId       String
+  sale         Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  nameSnapshot String
+  price        Int
+  qty          Int
+  subtotal     Int
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  meta      Json
+  createdAt DateTime @default(now())
+}
+
+model Branch {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  warehouses Warehouse[]
+  users      User[]
+  shifts     Shift[]
+  sales      Sale[]
+}
+
+model Warehouse {
+  id         String    @id @default(cuid())
+  name       String
+  branchId   String
+  branch     Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  isDefault  Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  inventory  Inventory[]
+  stockMoves StockMove[]
+}
+
+model Inventory {
+  id          String    @id @default(cuid())
+  productId   String
+  warehouseId String
+  qty         Int
+
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, warehouseId])
+}
+
+enum StockMoveType {
+  RECEIPT
+  ADJUSTMENT
+  SALE
+  RETURN
+  TRANSFER_IN
+  TRANSFER_OUT
+}
+
+model StockMove {
+  id          String        @id @default(cuid())
+  productId   String
+  warehouseId String
+  delta       Int
+  type        StockMoveType
+  reason      String?
+  note        String?
+  userId      String?
+  createdAt   DateTime      @default(now())
+
+  product     Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+  warehouse   Warehouse     @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

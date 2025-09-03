@@ -1,0 +1,29 @@
+{
+  "name": "mini-crm",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:admin": "npm --workspace=@mini/admin run dev",
+    "dev:pos": "npm --workspace=@mini/pos run dev",
+    "build:admin": "npm --workspace=@mini/admin run build",
+    "build:pos": "npm --workspace=@mini/pos run build",
+    "start:admin": "npm --workspace=@mini/admin run start",
+    "start:pos": "npm --workspace=@mini/pos run start",
+    "db:migrate": "npm --workspace=@mini/db run migrate",
+    "db:generate": "npm --workspace=@mini/db run generate",
+    "db:seed": "npm --workspace=@mini/db run seed",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.4",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.3"
+  }
+}
+

@@ -1,0 +1,49 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    container_name: mini_crm_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mini_crm
+      TZ: Asia/Tashkent
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    container_name: mini_crm_admin
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/mini_crm
+      SESSION_SECRET: ${SESSION_SECRET:-replace-with-strong-random-string}
+      TZ: Asia/Tashkent
+      PORT: 3000
+    ports:
+      - "3000:3000"
+
+  pos:
+    build:
+      context: .
+      dockerfile: apps/pos/Dockerfile
+    container_name: mini_crm_pos
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/mini_crm
+      SESSION_SECRET: ${SESSION_SECRET:-replace-with-strong-random-string}
+      TZ: Asia/Tashkent
+      PORT: 4000
+    ports:
+      - "4000:4000"
+
+volumes:
+  db_data:
+
