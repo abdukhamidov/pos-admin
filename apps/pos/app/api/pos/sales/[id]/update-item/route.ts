@@ -22,9 +22,24 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const product = await prisma.product.findUnique({ where: { id: item.productId } })
   if (!product) return NextResponse.json({ error: 'PRODUCT_NOT_FOUND' }, { status: 404 })
 
-  const otherQty = sale.items.filter((i) => i.productId === product.id && i.id !== item.id).reduce((s, i) => s + i.qty, 0)
+  // Проверяем остатки в складе по филиалу продавца, как и в add-item
+  const user = await prisma.user.findUnique({ where: { id: session.sub } })
+  const warehouse = user?.branchId
+    ? await prisma.warehouse.findFirst({ where: { branchId: user.branchId, isDefault: true } })
+    : null
+  if (!warehouse) return NextResponse.json({ error: 'WAREHOUSE_NOT_FOUND' }, { status: 400 })
+
+  const inv = await prisma.inventory.findUnique({
+    where: { productId_warehouseId: { productId: product.id, warehouseId: warehouse.id } },
+  })
+  const available = inv?.qty ?? 0
+
+  const otherQty = sale.items
+    .filter((i) => i.productId === product.id && i.id !== item.id)
+    .reduce((s, i) => s + i.qty, 0)
   const newQty = parsed.data.qty ?? item.qty
-  if (product.stock < otherQty + newQty) return NextResponse.json({ error: 'INSUFFICIENT_STOCK' }, { status: 400 })
+  if (available < otherQty + newQty)
+    return NextResponse.json({ error: 'INSUFFICIENT_STOCK' }, { status: 400 })
 
   const updated = await prisma.saleItem.update({
     where: { id: item.id },
