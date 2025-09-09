@@ -24,8 +24,8 @@ export async function GET(req: NextRequest) {
   if (query) {
     where.product = {
       OR: [
-        { name: { contains: query, mode: 'insensitive' } },
-        { sku: { contains: query, mode: 'insensitive' } },
+        { name: { contains: query } },
+        { sku: { contains: query } },
       ],
     }
   }
@@ -52,4 +52,3 @@ export async function GET(req: NextRequest) {
   }))
   return NextResponse.json(rows)
 }
-

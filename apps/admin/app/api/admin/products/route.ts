@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
         query
           ? {
               OR: [
-                { name: { contains: query, mode: 'insensitive' } },
-                { sku: { contains: query, mode: 'insensitive' } },
+                { name: { contains: query } },
+                { sku: { contains: query } },
               ],
             }
           : {},
