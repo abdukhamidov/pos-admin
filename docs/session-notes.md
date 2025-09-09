@@ -29,14 +29,14 @@
   - Выполнить: `npm run db:migrate && npm run db:generate` (или `npx prisma migrate dev` и `npx prisma generate`).
   - Эндпоинты теперь работают «best-effort»: лог движения не критичен и не ломает приёмку, но после генерации аудит будет писаться полноценно.
 
-Проект: монорепозиторий с админ‑панелью и POS на Next.js + Prisma (PostgreSQL).
+Проект: монорепозиторий с админ‑панелью и POS на Next.js + Prisma (MySQL).
 - Аутентификация: cookie‑сессии (JWT через `jose`), httpOnly, SameSite=Lax.
 - Роли: ADMIN/SELLER (RBAC в middleware обоих приложений).
 - Часовой пояс: Asia/Tashkent. Валюта: UZS.
 
 ## Стек и структура
 - Next.js 14 (App Router), React 18, TypeScript, Tailwind, shadcn‑совместимые UI.
-- Prisma 5 + PostgreSQL.
+- Prisma 5 + MySQL.
 - Монорепо:
   - `apps/admin` — админка (:3000)
   - `apps/pos` — POS (:4000)
