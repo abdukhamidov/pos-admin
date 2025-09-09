@@ -192,3 +192,18 @@ npx prisma generate
 - Утилиты: форматирование денег и дат (Intl.NumberFormat, 	oLocaleString).
 - UI: компоненты на базе shadcn (Button, Card, Dialog, Select, ScrollArea, Separator), адаптивная вёрстка.
 
+\n## MySQL: переход и настройка
+- База данных: MySQL 8 (Docker-сервис `db`).
+- Строка подключения (`DATABASE_URL`):
+  - локально: `mysql://root:password@localhost:3306/mini_crm`
+  - в Docker: `mysql://root:password@db:3306/mini_crm`
+- Prisma провайдер переключён на MySQL: см. `packages/db/prisma/schema.prisma` (datasource `provider = "mysql"`).
+- Инициализация базы с нуля:
+  - Запустить БД: `docker compose up -d db`
+  - Сгенерировать клиент: `npm run db:generate`
+  - Применить миграции (dev): `npm run db:migrate`
+  - Засеять данные: `npm run db:seed`
+- Если ранее были миграции под PostgreSQL — выполните сброс dev-окружения:
+  - `npx prisma migrate reset --force`
+  - `npx prisma generate`
+  - `npm run db:seed`

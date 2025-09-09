@@ -1,6 +1,6 @@
 Mini CRM + POS (Monorepo)
 
-Stack: Next.js (App Router), React 18, TypeScript, Tailwind, shadcn/ui, Prisma (PostgreSQL). Auth via signed cookie (Credentials). RBAC: ADMIN, SELLER. TZ: Asia/Tashkent. Currency: UZS.
+Stack: Next.js (App Router), React 18, TypeScript, Tailwind, shadcn/ui, Prisma (MySQL). Auth via signed cookie (Credentials). RBAC: ADMIN, SELLER. TZ: Asia/Tashkent. Currency: UZS.
 
 Structure
 
@@ -77,4 +77,3 @@ Security
 - bcrypt (10–12 rounds) for hashes
 - httpOnly cookie, SameSite=Lax
 - Zod validation for inputs
-

@@ -200,5 +200,18 @@ bootstrap().catch((e) => {
   process.exit(1)
 })
 
-process.once('SIGINT', () => bot.stop('SIGINT'))
-process.once('SIGTERM', () => bot.stop('SIGTERM'))
+async function shutdown(signal) {
+  try {
+    bot.stop(signal)
+  } catch {}
+  try {
+    await prisma.$disconnect()
+  } catch {}
+}
+
+process.once('beforeExit', () => {
+  // ensure Prisma disconnect
+  return prisma.$disconnect().catch(() => {})
+})
+process.once('SIGINT', () => shutdown('SIGINT'))
+process.once('SIGTERM', () => shutdown('SIGTERM'))
